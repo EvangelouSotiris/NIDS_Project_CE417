@@ -76,7 +76,7 @@ def prepare_data():
 	"""
 
 	# read our csv files
-	#features_df = pd.read_csv("UNSW_NB15_features.csv",encoding = "ISO-8859-1")
+	features_df = pd.read_csv("UNSW_NB15_features.csv",encoding = "ISO-8859-1")
 	training_df = pd.read_csv("training.csv").drop("id",axis=1)
 	testing_df = pd.read_csv("testing.csv").drop("id",axis=1)
 
@@ -85,17 +85,19 @@ def prepare_data():
 
 	train_x,test_x = delete_higly_correlated_cols(train_x,test_x)
 
-	training_df = training_df.drop(["proto","state","service","attack_cat","label","ct_ftp_cmd"], axis=1)
-	print("The features we will use are: ", np.array(list(training_df)))
-
-	""" ## Just to show that the data given need some work to use
+	## Just to show that the data given need some work to use
 	feature_list = np.array(features_df.Name)
-	features_of_training_set = np.array(list(training_set_df))
+	features_of_training_set = np.array(list(training_df))
 	print("Features mentioned in the features.csv but are not included in the dataset:")
 	for i in range(len(feature_list)):
 		if feature_list[i] not in features_of_training_set:
 			print(feature_list[i])
-	"""
+
+	training_df = training_df.drop(["proto","state","service","attack_cat","label","ct_ftp_cmd"], axis=1)
+	print("The features we will use are: ", np.array(list(training_df)))
+
+	
+	
 	return train_x,train_y,test_x,test_y
 
 prepare_data()
