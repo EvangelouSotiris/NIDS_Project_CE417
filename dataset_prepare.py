@@ -62,4 +62,4 @@ def prepare_data():
 	training_df = training_df.drop(["attack_cat","label"], axis=1)
 	print("The features we will use are: ", np.array(list(training_df)))
 
-	return train_x,train_y,test_x,test_y
+	return train_x,train_y,test_x,test_y,list(training_df)
