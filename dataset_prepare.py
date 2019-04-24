@@ -49,9 +49,10 @@ def prepare_data():
 	testing_df = pd.read_csv("testing.csv").drop("id",axis=1)
 
 	fs = FeatureSelector(data = training_df)
-	fs.identify_collinear(correlation_threshold=0.80)
+	fs.identify_collinear(correlation_threshold=0.85)
 	training_df = fs.remove(methods = ['collinear'],keep_one_hot = True)
-	testing_df = fs.remove(methods = ['collinear'],keep_one_hot = True)
+	columnlist = list(training_df)
+	testing_df = testing_df[columnlist]
 	
 	training_df = training_df.sample(frac=1)
 	testing_df = testing_df.sample(frac=1)
