@@ -13,8 +13,6 @@ Install the other libraries used by the project by entering in console the follo
 ```
 pip3 install pandas tensorflow matplotlib keras scikit-learn
 ```
-<br>
-
 ## Run
 The IDS can classify incoming packets using Support-Vectors Machine, Random Forest, and Multilayer Perceptron Neural Network.<br>
 The default is MLP, so to run with <b>MLP</b> just enter in console:
