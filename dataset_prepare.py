@@ -20,19 +20,23 @@ def clean_nominals_and_create_our_datasets(train_set_df,test_set_df):
 	    test_set_df[nom] =testEnc.transform(test_set_df[nom])
 
 	# drop the nominal columns from the initial set
-	train_set_df_y = train_set_df.label
+	train_set_df_y = train_set_df.attack_cat
 	train_Y = np.array(train_set_df_y)
 	train_Y = train_Y.reshape((train_Y.shape[0],1))
 	train_set_df = train_set_df.drop(["attack_cat","label"], axis=1)
 	train_X = np.array(train_set_df)
 
-	test_set_df_y = test_set_df.label
+	test_set_df_y = test_set_df.attack_cat
+	test_set_df_y1 = test_set_df.label
 	test_Y = np.array(test_set_df_y)
 	test_Y = test_Y.reshape((test_Y.shape[0],1))
 	test_set_df = test_set_df.drop(["attack_cat","label"], axis=1)
 	test_X = np.array(test_set_df)
+
+	labels = np.array(test_set_df_y1)
+	labels = labels.reshape((labels.shape[0],1))
 	
-	return train_X,train_Y,test_X,test_Y
+	return train_X,train_Y,test_X,test_Y,labels
 
 def prepare_data(): 
 	"""
@@ -56,11 +60,9 @@ def prepare_data():
 	
 	training_df = training_df.sample(frac=1)
 	testing_df = testing_df.sample(frac=1)
-	train_x,train_y,test_x,test_y = clean_nominals_and_create_our_datasets(training_df,testing_df)
-
-	#train_x,test_x = delete_higly_correlated_cols(train_x,test_x)
+	train_x,train_y,test_x,test_y, labels = clean_nominals_and_create_our_datasets(training_df,testing_df)
 
 	training_df = training_df.drop(["attack_cat","label"], axis=1)
 	print("The features we will use are: ", np.array(list(training_df)))
 
-	return train_x,train_y,test_x,test_y,list(training_df)
+	return train_x,train_y,test_x,test_y,labels
