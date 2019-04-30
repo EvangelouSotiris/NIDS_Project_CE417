@@ -59,33 +59,36 @@ def supported_vector_machine():
 	"""
 	train_x,train_y,test_x,test_y,labels = prepare_data()
 
-	C=10
-	gamma =0.1
+	C=100
+	gamma =0.00001
+	boundary = 50000
 
 	train_y = train_y.reshape((train_y.shape[0],))
 
 	print(C,gamma)
-	classifier = SVC(kernel="rbf",C=C,gamma=gamma, verbose=1)
-	classifier.fit(train_x[:30000,:], train_y[:30000])
+	classifier = SVC(kernel="rbf",C=C,gamma=gamma,verbose=0)
+	classifier.fit(train_x[:boundary,:], train_y[:boundary])
 
 	yhat = classifier.predict(test_x)
+
 	for i in range(len(yhat)):
 		if yhat[i] == 6:
 			yhat[i] = 0 
 		else:
 			yhat[i] = 1
 	correct_class = 0
-	for i in range(len(labels)):
+
+	for i in range(len(yhat)):
 		if labels[i] == yhat[i]:
 			correct_class += 1
-	print("accuracy:{}%".format((correct_class/len(labels))*100))
+	print("accuracy:{}%".format((correct_class/len(yhat))*100))
 
 	SVs = classifier.support_vectors_ #support vectors
 
 	print("For C : ",C," Gamma: ",gamma) 
 	print("Number of Support Vectors: %d" %len(SVs))
 	print('\n')
-	print("Accuracy: {}%".format(classifier.score(test_x[:20000,:], test_y[:20000]) * 100 ))
+	#print("Accuracy: {}%".format(classifier.score(test_x, test_y) * 100 ))
 
 
 def graph_accuracy(acc):
@@ -113,13 +116,13 @@ def hard_lim(x):
 def create_model(trainx):
 	model = Sequential()
 
-	model.add(Dense(250, input_dim=trainx.shape[1], activation='relu'))
+	model.add(Dense(100, input_dim=trainx.shape[1], activation='relu'))
 	
-	model.add(Dense(125, activation='relu'))
+	model.add(Dense(50, activation='relu'))
 
 	model.add(Dense(10, activation='softmax'))
 
-	model.compile(optimizer='adam',loss='kullback_leibler_divergence',metrics=['mse','accuracy'])
+	model.compile(optimizer='adam',loss='categorical_crossentropy',metrics=['mse','accuracy'])
 	return model
 
 def multilayer_perceptron():
@@ -137,7 +140,7 @@ def multilayer_perceptron():
 	model = create_model(trainx)
 
 	start = time.time()
-	hist = model.fit(trainx, trainy, epochs= 150, batch_size=150 , shuffle=True)#, callbacks=[es])
+	hist = model.fit(trainx, trainy, epochs= 100, batch_size=150 , shuffle=True,verbose = 1)#, callbacks=[es])
 	end = time.time()
 
 	plt.figure(figsize=(50,50))
