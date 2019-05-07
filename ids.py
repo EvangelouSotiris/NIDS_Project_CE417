@@ -91,11 +91,12 @@ def supported_vector_machine():
 	#print("Accuracy: {}%".format(classifier.score(test_x, test_y) * 100 ))
 
 
-def graph_accuracy(acc):
+def graph_accuracy(acc,test_acc):
 	plt.subplot(1, 2, 1)
 	plt.title("Accuracy in every iteration of training")
-	plt.plot(acc, 'r-', label="accuracy")
-	plt.legend(loc='lower right')
+	plt.plot(acc, 'r-', label="training accuracy")
+	plt.bar(len(acc),test_acc, label="testing accuracy")
+	plt.legend(loc='lower left')
 	plt.xlabel("Iterations")
 	plt.ylabel("Accuracy")
 
@@ -140,13 +141,8 @@ def multilayer_perceptron():
 	model = create_model(trainx)
 
 	start = time.time()
-	hist = model.fit(trainx, trainy, epochs= 100, batch_size=150 , shuffle=True,verbose = 1)#, callbacks=[es])
+	hist = model.fit(trainx, trainy, epochs= 5, batch_size=150 , shuffle=True,verbose = 1)#, callbacks=[es])
 	end = time.time()
-
-	plt.figure(figsize=(50,50))
-	graph_accuracy(hist.history['acc'])
-	graph_loss(hist.history['mean_squared_error'])
-	plt.show()
 
 	ypreds = model.predict(testx)
 	predictions = np.argmax(ypreds, axis=1)
@@ -163,7 +159,6 @@ def multilayer_perceptron():
 			correct_class += 1
 
 	print("Training lasted {} seconds".format(end-start))
-
 	print("Normal/Abnormal activity accuracy:{}%".format((correct_class/len(labels))*100))
 	
 	confusion_matrix_metric = confusion_matrix(labels, predictions)
@@ -172,6 +167,24 @@ def multilayer_perceptron():
 
 	score = model.evaluate(testx, testy, batch_size=50)
 	print("Attack type classification:\nCategorical crossentropy :%s \nMean Squared Error:%s \nAccuracy:%s %%" %(score[0],score[1],score[2]))
+
+
+	plt.figure(figsize=(50,50))
+	graph_accuracy(hist.history['acc'],score[2])
+	graph_loss(hist.history['mean_squared_error'])
+	plt.show()
+
+
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+	cax = ax.matshow(confusion_matrix_metric)
+	plt.title('Confusion matrix of the classifier')
+	fig.colorbar(cax)
+	ax.set_xticklabels([''] + ['True','False'])
+	ax.set_yticklabels([''] + ['True','False'])
+	plt.xlabel('Predicted')
+	plt.ylabel('True')
+	plt.show()
 
 # MAIN
 if __name__ == '__main__':
