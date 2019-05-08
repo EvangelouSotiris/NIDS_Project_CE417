@@ -29,7 +29,7 @@ def random_forest():
 	train_x,train_y,test_x,test_y ,labels= prepare_data()
 	train_y = train_y.reshape((train_y.shape[0],))
 
-	clf = RandomForestClassifier(n_estimators=1000, max_depth=5,random_state=None)
+	clf = RandomForestClassifier(n_estimators=100, max_depth=5,random_state=None)
 	
 	start = time.time()
 	clf.fit(train_x,train_y)
@@ -45,10 +45,14 @@ def random_forest():
 	for i in range(len(labels)):
 		if labels[i] == yhat[i]:
 			correct_class += 1
-	print("Training lasted {} seconds".format(end-start))
-	print("Normal/Abnormal activity accuracy:{}%".format((correct_class/len(labels))*100))
-	print("Attack type accuracy: {}%".format(clf.score(test_x,test_y)*100))
 
+	print("\n## Time ##")
+	print("Training lasted {} seconds".format(end-start))
+	print("\n## Accuracies ##")
+	print("Normal/Abnormal activity accuracy:{}%".format((correct_class/len(labels))*100))
+	print("Attack type classification accuracy: {}%".format(clf.score(test_x,test_y)*100))
+
+	return(clf.score(test_x,test_y)*100,(correct_class/len(labels))*100)
 
 def supported_vector_machine():
 	"""
@@ -61,13 +65,17 @@ def supported_vector_machine():
 
 	C=100
 	gamma =0.00001
-	boundary = 50000
+	boundary = 5000
 
 	train_y = train_y.reshape((train_y.shape[0],))
 
 	print(C,gamma)
 	classifier = SVC(kernel="rbf",C=C,gamma=gamma,verbose=0)
+
+	start = time.time()
 	classifier.fit(train_x[:boundary,:], train_y[:boundary])
+	end = time.time()
+
 
 	yhat = classifier.predict(test_x)
 
@@ -81,15 +89,19 @@ def supported_vector_machine():
 	for i in range(len(yhat)):
 		if labels[i] == yhat[i]:
 			correct_class += 1
-	print("accuracy:{}%".format((correct_class/len(yhat))*100))
 
 	SVs = classifier.support_vectors_ #support vectors
-
 	print("For C : ",C," Gamma: ",gamma) 
 	print("Number of Support Vectors: %d" %len(SVs))
 	print('\n')
-	#print("Accuracy: {}%".format(classifier.score(test_x, test_y) * 100 ))
 
+	print("\n## Time ##")
+	print("Training lasted {} seconds".format(end-start))
+	print("\n## Accuracies ##")
+	print("Normal/Abnormal activity accuracy:{}%".format((correct_class/len(yhat))*100))
+	print("Attack type classification accuracy: {}%".format(classifier.score(test_x, test_y) * 100 ))
+
+	return(classifier.score(test_x, test_y) * 100,(correct_class/len(yhat))*100)
 
 def graph_accuracy(acc,test_acc):
 	plt.subplot(1, 2, 1)
@@ -107,6 +119,20 @@ def graph_loss(loss):
 	plt.legend(loc='upper right')
 	plt.xlabel("Iterations")
 	plt.ylabel("Mean Squared Error")
+
+def graph_confusion_matrix(conf):
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+	cax = ax.matshow(conf)
+	plt.title('Confusion matrix of Normal/Abnormal traffic classification')
+	fig.colorbar(cax)
+	ax.set_xticklabels([''] + ['True','False'])
+	ax.set_yticklabels([''] + ['True','False'])
+	ax.text(0, 0, "True-Positive",ha="center", va="center", color="green")
+	ax.text(0, 1, "False-Positive",ha="center", va="center", color="coral")
+	ax.text(1, 0, "False-Negative",ha="center", va="center", color="coral")
+	ax.text(1, 1, "True-Negative",ha="center", va="center", color="green")
+	plt.show()
 
 def hard_lim(x):
 	if x < 0.5:
@@ -127,6 +153,9 @@ def create_model(trainx):
 	return model
 
 def multilayer_perceptron():
+	plt.style.use('seaborn-muted')
+	plt.style.context(('dark_background'))
+
 	scaler = MinMaxScaler(feature_range=(0, 1))
 	trainx,trainy,testx,testy,labels = prepare_data()
 	temp = testy
@@ -157,34 +186,28 @@ def multilayer_perceptron():
 	for i in range(len(labels)):
 		if labels[i] == predictions[i]:
 			correct_class += 1
-
+	print("\n## Time ##")
 	print("Training lasted {} seconds".format(end-start))
+
+	print("\n## Accuracies ##")
 	print("Normal/Abnormal activity accuracy:{}%".format((correct_class/len(labels))*100))
-	
-	confusion_matrix_metric = confusion_matrix(labels, predictions)
-	print("\nConfusion Matrix for test dataset.")
-	print(confusion_matrix_metric)
 
 	score = model.evaluate(testx, testy, batch_size=50)
-	print("Attack type classification:\nCategorical crossentropy :%s \nMean Squared Error:%s \nAccuracy:%s %%" %(score[0],score[1],score[2]))
+	print("Attack type classification:\nCategorical crossentropy :%s \nMean Squared Error:%s \nAccuracy:%s %%" %(score[0],score[1],score[2]*100))
 
+	confusion_matrix_metric = confusion_matrix(labels, predictions)
+	print("\n## Confusion Matrix ##")
+	print("Confusion Matrix for test dataset.")
+	print(confusion_matrix_metric)
 
 	plt.figure(figsize=(50,50))
 	graph_accuracy(hist.history['acc'],score[2])
 	graph_loss(hist.history['mean_squared_error'])
 	plt.show()
 
+	graph_confusion_matrix(confusion_matrix_metric)
 
-	fig = plt.figure()
-	ax = fig.add_subplot(111)
-	cax = ax.matshow(confusion_matrix_metric)
-	plt.title('Confusion matrix of the classifier')
-	fig.colorbar(cax)
-	ax.set_xticklabels([''] + ['True','False'])
-	ax.set_yticklabels([''] + ['True','False'])
-	plt.xlabel('Predicted')
-	plt.ylabel('True')
-	plt.show()
+	return(score[2]*100,(correct_class/len(labels))*100)
 
 # MAIN
 if __name__ == '__main__':
@@ -194,5 +217,15 @@ if __name__ == '__main__':
 			supported_vector_machine()
 		elif sys.argv[1] == 'randomforest':
 			random_forest()
+		elif sys.argv[1] == '--comparative':
+			svm_atk,svm_lab = supported_vector_machine()
+			rf_atk, rf_lab = random_forest()
+			mlp_atk, mlp_lab = multilayer_perceptron()
+			x = ["SVM" , "RF", "MLP"]
+			labels = [svm_lab, rf_lab, mlp_lab]
+			atk_cats = [svm_atk, rf_atk, mlp_atk]
+			plt.plot(x,labels,'ro')
+			plt.plot(x,atk_cats,'bo')
+			plt.show()
 	else:
 		multilayer_perceptron()
