@@ -29,7 +29,7 @@ def random_forest():
 	train_x,train_y,test_x,test_y ,labels= prepare_data()
 	train_y = train_y.reshape((train_y.shape[0],))
 
-	clf = RandomForestClassifier(n_estimators=100, max_depth=5,random_state=None)
+	clf = RandomForestClassifier(n_estimators=1000, max_depth=5,random_state=None)
 	
 	start = time.time()
 	clf.fit(train_x,train_y)
@@ -65,7 +65,7 @@ def supported_vector_machine():
 
 	C=100
 	gamma =0.00001
-	boundary = 5000
+	boundary = 20000
 
 	train_y = train_y.reshape((train_y.shape[0],))
 
@@ -107,7 +107,7 @@ def graph_accuracy(acc,test_acc):
 	plt.subplot(1, 2, 1)
 	plt.title("Accuracy in every iteration of training")
 	plt.plot(acc, 'r-', label="training accuracy")
-	plt.bar(len(acc),test_acc, label="testing accuracy")
+	plt.plot(len(acc),test_acc,'b*', label="testing accuracy",markersize=12)
 	plt.legend(loc='lower left')
 	plt.xlabel("Iterations")
 	plt.ylabel("Accuracy")
@@ -170,7 +170,7 @@ def multilayer_perceptron():
 	model = create_model(trainx)
 
 	start = time.time()
-	hist = model.fit(trainx, trainy, epochs= 5, batch_size=150 , shuffle=True,verbose = 1)#, callbacks=[es])
+	hist = model.fit(trainx, trainy, epochs= 150, batch_size=150 , shuffle=True,verbose = 1)#, callbacks=[es])
 	end = time.time()
 
 	ypreds = model.predict(testx)
@@ -221,11 +221,17 @@ if __name__ == '__main__':
 			svm_atk,svm_lab = supported_vector_machine()
 			rf_atk, rf_lab = random_forest()
 			mlp_atk, mlp_lab = multilayer_perceptron()
-			x = ["SVM" , "RF", "MLP"]
 			labels = [svm_lab, rf_lab, mlp_lab]
 			atk_cats = [svm_atk, rf_atk, mlp_atk]
-			plt.plot(x,labels,'ro')
-			plt.plot(x,atk_cats,'bo')
+			plt.ylim(0, 100)
+			l1,l2,l3 = plt.bar(["SVM-norm", "RF-norm", "MLP-norm"],labels)
+			c1,c2,c3 = plt.bar(["SVM-atk" , "RF-atk", "MLP-atk"],atk_cats)
+			l1.set_facecolor('r')
+			c1.set_facecolor('b')
+			l2.set_facecolor('r')
+			c2.set_facecolor('b')
+			l3.set_facecolor('r')
+			c3.set_facecolor('b')
 			plt.show()
 	else:
 		multilayer_perceptron()
