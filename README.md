@@ -27,3 +27,9 @@ Lastly, in order to run using <b>Random Forest</b>, please enter in console:
 ```
 python3 ids.py randomforest
 ```
+
+## Pre-trained Model
+Inside the repository there is the idsmodel.h5 and idsmodel.json files which are the pre-trained weights and model that offer 84% accuracy. To test them, please enter in console:
+```
+python3 test_suite_MLP.py
+```
