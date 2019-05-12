@@ -103,6 +103,14 @@ def supported_vector_machine():
 
 	return(classifier.score(test_x, test_y) * 100,(correct_class/len(yhat))*100)
 
+def save_model(model, name):
+    model_json = model.to_json()
+    with open(name+".json", "w") as json_file:
+        json_file.write(model_json)
+    model.save_weights(name+".h5")
+    print("Saved model.")
+
+
 def graph_accuracy(acc,test_acc):
 	plt.subplot(1, 2, 1)
 	plt.title("Accuracy in every iteration of training")
@@ -134,18 +142,12 @@ def graph_confusion_matrix(conf):
 	ax.text(1, 1, "True-Negative",ha="center", va="center", color="green")
 	plt.show()
 
-def hard_lim(x):
-	if x < 0.5:
-		return 0
-	else:
-		return 1
-
 def create_model(trainx):
 	model = Sequential()
 
-	model.add(Dense(100, input_dim=trainx.shape[1], activation='relu'))
+	model.add(Dense(300, input_dim=trainx.shape[1], activation='relu'))
 	
-	model.add(Dense(50, activation='relu'))
+	model.add(Dense(150, activation='relu'))
 
 	model.add(Dense(10, activation='softmax'))
 
@@ -153,12 +155,10 @@ def create_model(trainx):
 	return model
 
 def multilayer_perceptron():
-	plt.style.use('seaborn-muted')
-	plt.style.context(('dark_background'))
 
 	scaler = MinMaxScaler(feature_range=(0, 1))
 	trainx,trainy,testx,testy,labels = prepare_data()
-	temp = testy
+
 	trainx = scaler.fit_transform(trainx)
 	testx = scaler.fit_transform(testx)
 
@@ -206,6 +206,8 @@ def multilayer_perceptron():
 	plt.show()
 
 	graph_confusion_matrix(confusion_matrix_metric)
+
+	save_model(model, 'idsmodel')
 
 	return(score[2]*100,(correct_class/len(labels))*100)
 
