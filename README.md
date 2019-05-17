@@ -13,6 +13,11 @@ Install the other libraries used by the project by entering in console the follo
 ```
 pip3 install pandas tensorflow matplotlib keras scikit-learn
 ```
+Clone the repository locally by entering in console the following command:
+```
+git clone https://github.com/EvangelouSotiris/NIDS_Project_CE417.git
+```
+
 ## Run
 The IDS can classify incoming packets using Support-Vectors Machine, Random Forest, and Multilayer Perceptron Neural Network.<br>
 The default is MLP, so to run with <b>MLP</b> just enter in console:
