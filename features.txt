@@ -1,30 +1,35 @@
 FEATURES NEEDED
 ---------------
-dur 
-proto 
-service 
-state  
-spkts 
-dpkts 
-rate 
-sttl 
-dttl 
-sload 
-dload 
-sinpkt 
-dinpkt 
-sjit 
-djit 
-swin 
-stcpb 
-dtcpb 
-tcprtt 
-smean 
-dmean 
-trans_depth 
-response_body_len 
-ct_srv_src 
-ct_state_ttl
-ct_dst_ltm
-is_ftp_login
-ct_flw_http_mthd
+dur ARG
+proto ARG
+service ZEEK
+state ARG
+spkts ARG
+dpkts ARG
+rate ARG
+sttl ARG
+dttl ARG
+sload ARG
+dload ARG
+sinpkt ARG
+dinpkt ARG
+sjit ARG
+djit ARG
+swin ARG
+stcpb ARG
+dtcpb ARG
+tcprtt ARG
+smean ARG
+dmean ARG
+trans_depth ZEEK 
+response_body_len ZEEK
+ct_srv_src -
+ct_state_ttl -
+ct_dst_ltm -
+is_ftp_login -
+ct_flw_http_mthd -
+
+LINKS
+-----
+1) https://www.systutorials.com/docs/linux/man/1-ra/
+2) https://docs.zeek.org/en/stable/examples/scripting/index.html#the-connection-record-data-type
