@@ -8,7 +8,7 @@ import(
   "github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcapgo"
   "time"
-  "os/exec"
+  //"os/exec"
 )
 
 /* Check the given arguments */
@@ -21,9 +21,6 @@ func checkForArguments() bool{
   }
 }
 
-func checkTheState(state *layers.TCP) string{
-  return "Hi"
-}
 var (
 
     snapshotLen int32  = 1024
@@ -92,32 +89,18 @@ func printPacketInfo(packet gopacket.Packet) {
 }
 func main(){
   if(!checkForArguments()){
-    fmt.Println("[ERROR]: Give the interface argument.")
+    fmt.Println("[ERROR]: Give the correct argument.")
     return
   }
   // Retrieve the interface
   device := os.Args[1]  
-  fmt.Println("Device : "+device)
-  
+
   // Open output pcap file and write header 
-	f, _ := os.Create(os.Args[2])
-  fmt.Println("File : "+os.Args[2])
+  f := os.Stdout
 	w := pcapgo.NewWriter(f)
 	w.WriteFileHeader(1024, layers.LinkTypeEthernet)
 	defer f.Close()
   
-  var compiler string = "python"
-  var path string = "test.py"
-
-  cmd := exec.Command(compiler,path)
-  cmd.Stdin = os.Stdin;
-  cmd.Stdout = os.Stdout;
-  cmd.Stderr = os.Stderr;
-  err := cmd.Run() 
-  if err != nil {
-      fmt.Printf("%v\n", err)
-  }
-
   //Open device
   handle,err = pcap.OpenLive(device,1024,promiscuous,timeout)
 
@@ -130,11 +113,11 @@ func main(){
   // Use the handle as a packet source to process all packets
   packetSource := gopacket.NewPacketSource(handle,handle.LinkType())
   for packet := range packetSource.Packets(){
-    printPacketInfo(packet) 
+    //printPacketInfo(packet) 
 	  w.WritePacket(packet.Metadata().CaptureInfo, packet.Data())
     packetCount++
     
-    if packetCount > 100{
+    if packetCount > 10000{
       break
     }
   }  
