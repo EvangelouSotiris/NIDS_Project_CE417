@@ -29,12 +29,18 @@ def multilayer_perceptron():
     # Read the line
     for line in sys.stdin:
         if "Dur" not in line:
-            tokens = line.split()
-            print(len(tokens))
-            df = pd.DataFrame()
-            for i in range(len(cols)):
-                df[cols[i]] = tokens[i]
-            print(df)
+            tokens = line.split(",")
+            print(tokens)
+            #df = pd.DataFrame()
+            #for i in range(len(cols)):
+                #df[cols[i]] = tokens[i]
+            #print(df)
             #df = pd.DataFrame(tokens)
+def test():
+    for line in sys.stdin:
+        #if "Dur" not in line
+        print(line)
+
 if __name__ == "__main__":
+    #test()
     multilayer_perceptron()
