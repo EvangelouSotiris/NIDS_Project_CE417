@@ -3,8 +3,22 @@ import keras
 from keras.models import model_from_json
 from onlyLabelsPrepare import transform_to_nominal
 from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import MinMaxScaler
 import pandas as pd
 import numpy as np
+
+import tensorflow.python.util.deprecation as deprecation
+deprecation._PRINT_DEPRECATION_WARNINGS = False
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 def load_model(name):
     #load json and create model
@@ -36,6 +50,59 @@ def ct_state_ttl(sttl,dttl,state):
   
   return ct_state
 
+def define_service(dstport):
+  if dstport == "https" :
+    service = "https"
+    dstport = "443"
+  elif dstport == "http":
+    service = "http"
+    dstport = "80"
+  elif dstport == "ftp":
+    service = "ftp"
+    dstport = "21"
+  elif dstport == "domain":
+    service = "domain"
+    dstport = "53"
+  elif dstport == "mdns":
+    service = "dns"
+    dsport = "5353"
+  elif dstport == "netbios-dgm":
+    service = "netbios-dgm"
+    dstport = "138"
+  elif dstport == "smtp":
+    service = "smtp"
+    dstport = "25"
+  elif dstport == "snmp":
+    service = "snmp"
+    dstport = "161"
+  elif dstport == "ftp-data":
+    service = "ftp-data"
+    dstport = "20"
+  elif dstport == "ssh":
+    service = "ssh"
+    dstport = "22"
+  elif dstport == "dhcp":
+    service = "dhcp"
+    dstport = "546"
+  elif dstport == "irc":
+    service = "irc"
+    dstport = "194"
+  elif dstport == "pop3":
+    service = "pop3"
+    dstport = "995"
+  elif dstport == "radius":
+    service = "radius"
+    dstport = "1812"
+  elif dstport == "ssl":
+    service = "ssl"
+    dstport = "443" 
+  else :
+    service = "-"
+
+  return dstport,service
+
+
+
 def is_ftp_login(service):
   if service == 'ftp':
     return 1
@@ -51,19 +118,10 @@ def basic_tokens(line):
   dstip = tokens[6]
   dstport = tokens[7]
   ltime = tokens[12]
-
-  if dstport == "https" :
-    service = "https"
-    dstport = "443"
-  elif dstport == "http":
-    service = "http"
-    dstport = "80"
-  elif dstport == "ftp":
-    service = "ftp"
-    dstport = "21"
-  else :
-    service = "-"
-
+  
+  # Retrieve the service 
+  dstport,service = define_service(dstport)
+ 
   # Get the other arguments
   tokens = tokens[13:]
   tokens.insert(2,service)
@@ -112,9 +170,10 @@ def multilayer_perceptron():
     # Prepare data( extract classes in order to turn to nominal ) 
     label_classes,nominal_cols,columns = transform_to_nominal()
     
-    print(columns)
+    print("Features we willl use: \n"+str(columns))
     cols = ['dur','proto','service','state','spkts','dpkts','rate','sttl','dttl','sload','dload','sintpkt','dintpkt','sjit','djit','swin','stcpb','dtcpb','tcprtt','smeansz','dmeansz','trans_depth','response_body_len','ct_srv_src','ct_state_ttl','ct_dst_ltm','is_ftp_login','ct_flw_http_mthd']
-    print(len(cols))
+   
+    print("\n\nStarting the real time NIDS....\n\n")
     # Read the line
     firstLine = input()
 
@@ -130,7 +189,6 @@ def multilayer_perceptron():
         # Retrieve the tokens of the two lines
         firstLine_tokens,firstSrcIP,firstSrcPort,firstDstIP,firstDstPort,firstLtime =basic_tokens(firstLine)
         secLine_tokens,secSrcIP,secSrcPort,secDstIP,secDstPort,secLtime = basic_tokens(secLine)
-        
         
         # Response boby length ( We need to fix that shit )
         firstLine_tokens.insert(22,"0")
@@ -149,7 +207,42 @@ def multilayer_perceptron():
         
         firstLine_tokens = np.array([firstLine_tokens])
         df = pd.DataFrame(columns=cols,data=firstLine_tokens)
-        print(df)
+        keepDF = df.copy()
+        
+        # Turn from nominal to numeric
+        for nom in nominal_cols:
+
+          le = LabelEncoder()
+          le.fit(df[nom])
+          
+          # Check if the classes already included to the encoder
+          if le.classes_[0] not in label_classes[nom]:
+            le.classes_ = np.concatenate((label_classes[nom],le.classes_))
+          else:
+            le.classes_ = label_classes[nom]
+
+          # Transform the nominal to numberic
+          df[nom] = le.transform(df[nom])
+
+        # String to numbers
+        dataForTest = np.array(df)[0]
+        dataForTest = np.array([float(it) for it in dataForTest])
+        
+        # Predict
+        scaler = MinMaxScaler(feature_range=(0, 1))
+        dataForTest = scaler.fit_transform(dataForTest.reshape(-1,1))
+
+        dataForTest = dataForTest.reshape(1,28)
+        ypred = model.predict(dataForTest)
+        ypred = np.argmax(ypred,axis=1)
+
+        if ypred[0] == 6:
+          print(bcolors.OKGREEN+"Normal Behavior"+bcolors.ENDC)
+        else:
+          print(bcolors.FAIL+"Possible Attack")
+          print(keepDF.head())
+          print(bcolors.ENDC)
+        #predictions = np.argmax(ypreds, axis=1)
         firstLine = secLine
       else:
         secLine = input() 
