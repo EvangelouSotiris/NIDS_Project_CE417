@@ -111,17 +111,22 @@ def is_ftp_login(service):
 
 def basic_tokens(line):
   tokens = line.split(",")
-  #print(tokens)
   # Retrieve the service
   srcip = tokens[3]
   srcport = tokens[4]
   dstip = tokens[6]
   dstport = tokens[7]
+  res_bd_len = tokens[9]
   ltime = tokens[12]
   
   # Retrieve the service 
   dstport,service = define_service(dstport)
  
+  if service == "http" or service == "https":
+    res_bd_len = tokens[9]
+  else:
+    res_bd_len = "0"
+
   # Get the other arguments
   tokens = tokens[13:]
   tokens.insert(2,service)
@@ -140,7 +145,7 @@ def basic_tokens(line):
   # ftp login
   tokens.insert(len(tokens)+1,is_ftp_login(service))
 
-  return tokens,srcip,srcport,dstip,dstport,ltime
+  return tokens,srcip,srcport,dstip,dstport,ltime,res_bd_len
 def ct_srv_src(curIp,curService,nextIp,nextService,ct_srv):
   if curIp == nextIp and curService == nextService:
     ct_srv+=1
@@ -165,7 +170,7 @@ def multilayer_perceptron():
     
     # Load the model
     model = load_model('idsmodel')
-
+    
     print("Extracting labels...")
     # Prepare data( extract classes in order to turn to nominal ) 
     label_classes,nominal_cols,columns = transform_to_nominal()
@@ -187,11 +192,11 @@ def multilayer_perceptron():
         secLine = input()
         
         # Retrieve the tokens of the two lines
-        firstLine_tokens,firstSrcIP,firstSrcPort,firstDstIP,firstDstPort,firstLtime =basic_tokens(firstLine)
-        secLine_tokens,secSrcIP,secSrcPort,secDstIP,secDstPort,secLtime = basic_tokens(secLine)
+        firstLine_tokens,firstSrcIP,firstSrcPort,firstDstIP,firstDstPort,firstLtime,first_bd_len =basic_tokens(firstLine)
+        secLine_tokens,secSrcIP,secSrcPort,secDstIP,secDstPort,secLtime,sec_bd_len = basic_tokens(secLine)
         
         # Response boby length ( We need to fix that shit )
-        firstLine_tokens.insert(22,"0")
+        firstLine_tokens.insert(22,first_bd_len)
 
         #Check for the ct_srv 
         ct_srv = ct_srv_src(firstSrcIP,firstLine_tokens[2],secSrcIP,secLine_tokens[2],ct_srv)
