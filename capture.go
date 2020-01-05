@@ -13,8 +13,7 @@ import(
 
 /* Check the given arguments */
 func checkForArguments() bool{
-  argsWithoutProg := os.Args[1:]
-  if(len(argsWithoutProg) > 1){
+  if(len(os.Args) == 2){
     return true
   } else {
     return false
@@ -117,8 +116,8 @@ func main(){
 	  w.WritePacket(packet.Metadata().CaptureInfo, packet.Data())
     packetCount++
     
-    if packetCount > 10000{
-      break
-    }
+    //if packetCount > 10000{
+    //  break
+    //}
   }  
 }
