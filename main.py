@@ -6,6 +6,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import MinMaxScaler
 import pandas as pd
 import numpy as np
+from os import path
 
 import tensorflow.python.util.deprecation as deprecation
 deprecation._PRINT_DEPRECATION_WARNINGS = False
@@ -246,9 +247,11 @@ def multilayer_perceptron():
         if ypred[0] == 6:
           print(bcolors.OKGREEN+"Normal Behavior"+bcolors.ENDC)
         else:
-          print(bcolors.FAIL+"Possible " + classes[ypred[0]] + " Attack")
-          print(keepDF.head())
-          print(bcolors.ENDC)
+          print(bcolors.FAIL+"Possible '" + classes[ypred[0]] + "' Attack : added to out.csv for analysis." + bcolors.ENDC)
+          if path.exists('out.csv'):
+            pd.DataFrame(dataForTest).to_csv('out.csv',mode='a', header=False)
+          else:
+            pd.DataFrame(dataForTest).to_csv('out.csv')
         #predictions = np.argmax(ypreds, axis=1)
         firstLine = secLine
       else:

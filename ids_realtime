@@ -1,0 +1,2 @@
+#!/bin/bash
+sudo env "PATH=$PATH" ./runall.sh
