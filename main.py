@@ -241,10 +241,12 @@ def multilayer_perceptron():
         ypred = model.predict(dataForTest)
         ypred = np.argmax(ypred,axis=1)
 
+        classes = ['Analysis','Backdoor','DoS','Exploits','Fuzzers','Generic','Normal','Reconnaissance','Shellcode','Worms']
+
         if ypred[0] == 6:
           print(bcolors.OKGREEN+"Normal Behavior"+bcolors.ENDC)
         else:
-          print(bcolors.FAIL+"Possible Attack")
+          print(bcolors.FAIL+"Possible " + classes[ypred[0]] + " Attack")
           print(keepDF.head())
           print(bcolors.ENDC)
         #predictions = np.argmax(ypreds, axis=1)
