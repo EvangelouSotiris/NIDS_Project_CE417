@@ -7,9 +7,11 @@ from sklearn.preprocessing import MinMaxScaler
 import pandas as pd
 import numpy as np
 from os import path
+import os
 
-import tensorflow.python.util.deprecation as deprecation
-deprecation._PRINT_DEPRECATION_WARNINGS = False
+#import tensorflow.python.util.deprecation as deprecation
+#deprecation._PRINT_DEPRECATION_WARNINGS = False
+
 
 class bcolors:
     HEADER = '\033[95m'
@@ -248,10 +250,12 @@ def multilayer_perceptron():
           print(bcolors.OKGREEN+"Normal Behavior"+bcolors.ENDC)
         else:
           print(bcolors.FAIL+"Possible '" + classes[ypred[0]] + "' Attack : added to out.csv for analysis." + bcolors.ENDC)
+          df = pd.DataFrame(dataForTest)
+          df.insert(df.shape[1]-1,column='predclass',value=classes[ypred[0]])
           if path.exists('out.csv'):
-            pd.DataFrame(dataForTest).to_csv('out.csv',mode='a', header=False)
+            df.to_csv('out.csv',mode='a', header=False)
           else:
-            pd.DataFrame(dataForTest).to_csv('out.csv')
+            df.to_csv('out.csv')
         #predictions = np.argmax(ypreds, axis=1)
         firstLine = secLine
       else:
